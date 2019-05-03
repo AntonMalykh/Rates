@@ -2,7 +2,7 @@
           package="io.malykh.anton.presentation">
 
     <application>
-        <activity android:name="io.malykh.anton.presentation.CurrencyRatesActivity">
+        <activity android:name="io.malykh.anton.screens.currency_rates.CurrencyRatesActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>

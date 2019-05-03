@@ -1,3 +1,36 @@
 <resources>
     <string name="app_name">presentation</string>
+    <string name="currency_euro">Euro</string>
+    <string name="currency_australian_dollar">Australian Dollar</string>
+    <string name="currency_bulgarian_lev">Bulgarian Lev</string>
+    <string name="currency_brazilian_real">Brazilian Real</string>
+    <string name="currency_canadian_dollar">Canadian Dollar</string>
+    <string name="currency_swiss_franc">Swiss Franc</string>
+    <string name="currency_yuan_renminbi">Yuan Renminbi</string>
+    <string name="currency_czech_koruna">Czech Koruna</string>
+    <string name="currency_danish_krone">Danish Krone</string>
+    <string name="currency_pound_sterling">Pound Sterling</string>
+    <string name="currency_hong_kong_dollar">Hong Kong Dollar</string>
+    <string name="currency_kuna">Kuna</string>
+    <string name="currency_forint">Forint</string>
+    <string name="currency_rupiah">Rupiah</string>
+    <string name="currency_lilangeni">Lilangeni</string>
+    <string name="currency_indian_rupee">Indian Rupee</string>
+    <string name="currency_iceland_krona">Iceland Krona</string>
+    <string name="currency_yen">Yen</string>
+    <string name="currency_south_korean_won">South Korean Won</string>
+    <string name="currency_mexican_peso">Mexican Peso</string>
+    <string name="currency_malaysian_ringgit">Malaysian Ringgit</string>
+    <string name="currency_norwegian_krone">Norwegian Krone</string>
+    <string name="currency_new_zealand_dollar">New Zealand Dollar</string>
+    <string name="currency_philippine_peso">Philippine Peso</string>
+    <string name="currency_zloty">Zloty</string>
+    <string name="currency_romanian_leu">Romanian Leu</string>
+    <string name="currency_russian_ruble">Russian Ruble</string>
+    <string name="currency_swedish_krona">Swedish Krona</string>
+    <string name="currency_singapore_dollar">Singapore Dollar</string>
+    <string name="currency_baht">Baht</string>
+    <string name="currency_turkish_lira">Turkish Lira</string>
+    <string name="currency_us_dollar">US Dollar</string>
+    <string name="currency_rand">Rand</string>
 </resources>
