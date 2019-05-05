@@ -31,13 +31,13 @@ abstract class ActivityBase<Model: ViewModel>(private val layoutId: Int): AppCom
 
     protected abstract fun onObserveData(viewModel: Model)
 
-    protected fun View.requestKeyboard(onKeyboardShown: (() -> Unit)? = null) {
+    fun requestKeyboard(view: View, onKeyboardShown: (() -> Unit)? = null) {
         launch {
-            while(!ViewCompat.isLaidOut(this@requestKeyboard))
+            while(!ViewCompat.isLaidOut(view))
                 delay(SHOW_KEYBOARD_RETRY_DELAY_MS)
-            this@requestKeyboard.requestFocus()
+            view.requestFocus()
             (getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager)
-                .showSoftInput(this@requestKeyboard, 0)
+                .showSoftInput(view, 0)
             onKeyboardShown?.invoke()
         }
     }

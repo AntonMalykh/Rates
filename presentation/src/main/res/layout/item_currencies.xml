@@ -8,7 +8,8 @@
     android:paddingLeft="@dimen/offset_default"
     android:paddingRight="@dimen/offset_default"
     android:paddingTop="@dimen/offset_small"
-    android:paddingBottom="@dimen/offset_small">
+    android:paddingBottom="@dimen/offset_small"
+    android:background="?attr/selectableItemBackground">
 
     <ImageView
         android:id="@+id/icon"

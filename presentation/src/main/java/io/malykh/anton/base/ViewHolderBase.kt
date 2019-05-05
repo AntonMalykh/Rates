@@ -7,7 +7,10 @@ import android.view.ViewGroup
 
 internal abstract class ViewHolderBase<T: Any>(@LayoutRes layoutId: Int,
                                                parentView: ViewGroup):
-    RecyclerView.ViewHolder(LayoutInflater.from(parentView.context).inflate(layoutId, parentView)) {
+    RecyclerView.ViewHolder(
+        LayoutInflater
+            .from(parentView.context)
+            .inflate(layoutId, parentView, false)) {
 
     /**
      * beware: this value is valid only when [bind] has already been called
@@ -17,4 +20,11 @@ internal abstract class ViewHolderBase<T: Any>(@LayoutRes layoutId: Int,
     open fun bind(item: T){
         this.data = item
     }
+
+    fun bind(item: T, payloads: List<Any>?): Boolean {
+        this.data = item
+        return bindPayloads(payloads)
+    }
+
+    protected open fun bindPayloads(payloads: List<Any>?): Boolean = false
 }

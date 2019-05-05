@@ -5,12 +5,13 @@ import android.graphics.drawable.Drawable
 import io.malykh.anton.base.DataMapper
 import io.malykh.anton.core.data.entity.Currency
 import io.malykh.anton.core.data.entity.Currency.*
+import io.malykh.anton.core.data.entity.CurrencyRate
 import io.malykh.anton.presentation.R
 
-internal class CurrencyMapper(private val resources: Resources): DataMapper<Currency, CurrencyExt> {
+internal class CurrencyMapper(private val resources: Resources): DataMapper<CurrencyRate, CurrencyExt> {
 
-    override fun map(from: Currency): CurrencyExt =
-        CurrencyExt(from, from.getLocalizedDescription(), from.getFlag())
+    override fun map(from: CurrencyRate): CurrencyExt =
+        CurrencyExt(from, from.currency.getLocalizedDescription(), from.currency.getFlag())
 
     private fun Currency.getLocalizedDescription(): String {
         val descriptionResId: Int = when (this) {
@@ -53,39 +54,39 @@ internal class CurrencyMapper(private val resources: Resources): DataMapper<Curr
 
     private fun Currency.getFlag(): Drawable {
         val flagResId: Int = when (this) {
-            EUR -> R.drawable.currency_euro
-            AUD -> R.drawable.currency_australian_dollar
-            BGN -> R.drawable.currency_bulgarian_lev
-            BRL -> R.drawable.currency_brazilian_real
-            CAD -> R.drawable.currency_canadian_dollar
-            CHF -> R.drawable.currency_swiss_franc
-            CNY -> R.drawable.currency_yuan_renminbi
-            CZK -> R.drawable.currency_czech_koruna
-            DKK -> R.drawable.currency_danish_krone
-            GBP -> R.drawable.currency_pound_sterling
-            HKD -> R.drawable.currency_hong_kong_dollar
-            HRK -> R.drawable.currency_kuna
-            HUF -> R.drawable.currency_forint
-            IDR -> R.drawable.currency_rupiah
-            ILS -> R.drawable.currency_lilangeni
-            INR -> R.drawable.currency_indian_rupee
-            ISK -> R.drawable.currency_iceland_krona
-            JPY -> R.drawable.currency_yen
-            KRW -> R.drawable.currency_south_korean_won
-            MXN -> R.drawable.currency_mexican_peso
-            MYR -> R.drawable.currency_malaysian_ringgit
-            NOK -> R.drawable.currency_norwegian_krone
-            NZD -> R.drawable.currency_new_zealand_dollar
-            PHP -> R.drawable.currency_philippine_peso
-            PLN -> R.drawable.currency_zloty
-            RON -> R.drawable.currency_romanian_leu
-            RUB -> R.drawable.currency_russian_ruble
-            SEK -> R.drawable.currency_swedish_krona
-            SGD -> R.drawable.currency_singapore_dollar
-            THB -> R.drawable.currency_baht
-            TRY -> R.drawable.currency_turkish_lira
-            USD -> R.drawable.currency_us_dollar
-            ZAR -> R.drawable.currency_rand
+            EUR -> R.drawable.ic_currency_euro
+            AUD -> R.drawable.ic_currency_australian_dollar
+            BGN -> R.drawable.ic_currency_bulgarian_lev
+            BRL -> R.drawable.ic_currency_brazilian_real
+            CAD -> R.drawable.ic_currency_canadian_dollar
+            CHF -> R.drawable.ic_currency_swiss_franc
+            CNY -> R.drawable.ic_currency_yuan_renminbi
+            CZK -> R.drawable.ic_currency_czech_koruna
+            DKK -> R.drawable.ic_currency_danish_krone
+            GBP -> R.drawable.ic_currency_pound_sterling
+            HKD -> R.drawable.ic_currency_hong_kong_dollar
+            HRK -> R.drawable.ic_currency_kuna
+            HUF -> R.drawable.ic_currency_forint
+            IDR -> R.drawable.ic_currency_rupiah
+            ILS -> R.drawable.ic_currency_lilangeni
+            INR -> R.drawable.ic_currency_indian_rupee
+            ISK -> R.drawable.ic_currency_iceland_krona
+            JPY -> R.drawable.ic_currency_yen
+            KRW -> R.drawable.ic_currency_south_korean_won
+            MXN -> R.drawable.ic_currency_mexican_peso
+            MYR -> R.drawable.ic_currency_malaysian_ringgit
+            NOK -> R.drawable.ic_currency_norwegian_krone
+            NZD -> R.drawable.ic_currency_new_zealand_dollar
+            PHP -> R.drawable.ic_currency_philippine_peso
+            PLN -> R.drawable.ic_currency_zloty
+            RON -> R.drawable.ic_currency_romanian_leu
+            RUB -> R.drawable.ic_currency_russian_ruble
+            SEK -> R.drawable.ic_currency_swedish_krona
+            SGD -> R.drawable.ic_currency_singapore_dollar
+            THB -> R.drawable.ic_currency_baht
+            TRY -> R.drawable.ic_currency_turkish_lira
+            USD -> R.drawable.ic_currency_us_dollar
+            ZAR -> R.drawable.ic_currency_rand
         }
         return resources.getDrawable(flagResId, null)
     }

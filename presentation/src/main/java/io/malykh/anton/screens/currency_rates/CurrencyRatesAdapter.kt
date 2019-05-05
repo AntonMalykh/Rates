@@ -14,7 +14,7 @@ internal class CurrencyRatesAdapter: AdapterBase<CurrencyRateEntry>() {
         return CurrencyRateViewHolder(viewParent)
     }
 
-    private class CurrencyRateViewHolder(parent: ViewGroup)
+    private inner class CurrencyRateViewHolder(parent: ViewGroup)
         : ViewHolderBase<CurrencyRateEntry>(R.layout.item_currencies, parent) {
 
         val icon: ImageView = itemView.findViewById(R.id.icon)
@@ -22,12 +22,37 @@ internal class CurrencyRatesAdapter: AdapterBase<CurrencyRateEntry>() {
         val description: TextView = itemView.findViewById(R.id.description)
         val value: EditText = itemView.findViewById(R.id.value)
 
+        init {
+            itemView.setOnClickListener { itemClickListener?.invoke(data) }
+        }
+
         override fun bind(item: CurrencyRateEntry) {
             super.bind(item)
-            icon.setImageDrawable(data.currency.flag)
-            name.text = data.currency.currency.name
-            description.text = data.currency.localizedDescription
-            value.setText(data.amount.toString())
+            icon.setImageDrawable(data.currencyExt.flag)
+            name.text = data.currencyExt.currencyRate.currency.name
+            description.text = data.currencyExt.localizedDescription
+            value.apply{
+                setText(data.amount.toString())
+                setOnClickListener {
+                    if (adapterPosition == 0) {
+                        isFocusable = true
+                        isFocusableInTouchMode = true
+                        (itemView.context as CurrencyRatesActivity).requestKeyboard(this)
+                    }
+                    else
+                        itemClickListener?.invoke(data)
+                }
+                isFocusable = false
+                isFocusableInTouchMode = false
+            }
+        }
+
+        override fun bindPayloads(payloads: List<Any>?): Boolean {
+            super.bindPayloads(payloads)
+            if (payloads.isNullOrEmpty() || payloads[0] !is Float)
+                return false
+            value.setText(payloads[0].toString())
+            return true
         }
     }
 }

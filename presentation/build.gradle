@@ -32,6 +32,7 @@ dependencies {
     implementation project(':core')
     implementation"org.jetbrains.kotlin:kotlin-stdlib-jdk7:$rootProject.kotlinVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$rootProject.kotlinCoroutinesVersion"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$rootProject.kotlinCoroutinesVersion"
 
     implementation "com.android.support:appcompat-v7:$rootProject.supportAppcomatVersion"
 
