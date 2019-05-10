@@ -8,13 +8,21 @@ import io.malykh.anton.base.AdapterBase
 import io.malykh.anton.base.ViewHolderBase
 import io.malykh.anton.presentation.R
 
-internal class CurrencyRatesAdapter: AdapterBase<CurrencyRateEntry>() {
+internal class CurrencyRatesAdapter
+    : AdapterBase<CurrencyRateEntry>() {
+
+    var onInputFocusChangedListener: ((EditText, Boolean) -> Unit)? = null
 
     override fun onCreateViewHolder(viewParent: ViewGroup, viewType: Int): ViewHolderBase<CurrencyRateEntry> {
-        return CurrencyRateViewHolder(viewParent)
+        return CurrencyRateViewHolder(
+            viewParent,
+            itemClickListener,
+            onInputFocusChangedListener)
     }
 
-    private inner class CurrencyRateViewHolder(parent: ViewGroup)
+    private class CurrencyRateViewHolder(parent: ViewGroup,
+                                         val itemClickListener: ((CurrencyRateEntry) -> Unit)?,
+                                         val onInputFocusChangedListener: ((EditText, Boolean) -> Unit)?)
         : ViewHolderBase<CurrencyRateEntry>(R.layout.item_currencies, parent) {
 
         val icon: ImageView = itemView.findViewById(R.id.icon)
@@ -23,7 +31,16 @@ internal class CurrencyRatesAdapter: AdapterBase<CurrencyRateEntry>() {
         val value: EditText = itemView.findViewById(R.id.value)
 
         init {
-            itemView.setOnClickListener { itemClickListener?.invoke(data) }
+            itemView.setOnClickListener {
+                if (adapterPosition != 0)
+                    itemClickListener?.invoke(data)
+            }
+            itemView.setOnFocusChangeListener { _, hasFocus -> if (hasFocus) value.requestFocus() }
+            value.setOnFocusChangeListener { _, hasFocus ->
+                if (adapterPosition == 0) {
+                    onInputFocusChangedListener?.invoke(value, hasFocus)
+                }
+            }
         }
 
         override fun bind(item: CurrencyRateEntry) {
@@ -31,13 +48,25 @@ internal class CurrencyRatesAdapter: AdapterBase<CurrencyRateEntry>() {
             icon.setImageDrawable(data.currencyExt.flag)
             name.text = data.currencyExt.currencyRate.currency.name
             description.text = data.currencyExt.localizedDescription
+            applyAmount(data.amount)
+        }
+
+        override fun bindPayloads(payloads: List<Any>?): Boolean {
+            super.bindPayloads(payloads)
+            if (payloads.isNullOrEmpty() || payloads[0] !is Float)
+                return false
+            applyAmount(payloads[0] as Float)
+            return true
+        }
+
+        private fun applyAmount(amount: Float) {
+            value.setText(if (amount == 0f) null else amount.toString())
             value.apply{
-                setText(data.amount.toString())
                 setOnClickListener {
                     if (adapterPosition == 0) {
                         isFocusable = true
                         isFocusableInTouchMode = true
-                        (itemView.context as CurrencyRatesActivity).requestKeyboard(this)
+                        requestFocus()
                     }
                     else
                         itemClickListener?.invoke(data)
@@ -45,14 +74,6 @@ internal class CurrencyRatesAdapter: AdapterBase<CurrencyRateEntry>() {
                 isFocusable = false
                 isFocusableInTouchMode = false
             }
-        }
-
-        override fun bindPayloads(payloads: List<Any>?): Boolean {
-            super.bindPayloads(payloads)
-            if (payloads.isNullOrEmpty() || payloads[0] !is Float)
-                return false
-            value.setText(payloads[0].toString())
-            return true
         }
     }
 }

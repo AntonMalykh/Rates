@@ -1,4 +1,4 @@
-package io.malykh.anton.data
+package io.malykh.anton.screens.currency_rates.data
 
 import android.graphics.drawable.Drawable
 import io.malykh.anton.core.data.entity.CurrencyRate

@@ -7,6 +7,7 @@ import android.support.v4.view.ViewCompat
 import android.support.v7.app.AppCompatActivity
 import android.view.View
 import android.view.inputmethod.InputMethodManager
+import io.malykh.anton.presentation.R
 import kotlinx.coroutines.*
 import kotlin.coroutines.CoroutineContext
 
@@ -31,14 +32,19 @@ abstract class ActivityBase<Model: ViewModel>(private val layoutId: Int): AppCom
 
     protected abstract fun onObserveData(viewModel: Model)
 
-    fun requestKeyboard(view: View, onKeyboardShown: (() -> Unit)? = null) {
+    protected fun requestKeyboard(view: View, onKeyboardShown: (() -> Unit)? = null) {
         launch {
             while(!ViewCompat.isLaidOut(view))
                 delay(SHOW_KEYBOARD_RETRY_DELAY_MS)
-            view.requestFocus()
+            view.requestFocusFromTouch()
             (getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager)
                 .showSoftInput(view, 0)
             onKeyboardShown?.invoke()
         }
+    }
+
+    protected fun hideKeyboard() {
+        (getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager)
+            .hideSoftInputFromWindow(findViewById<View>(android.R.id.content).windowToken, 0)
     }
 }

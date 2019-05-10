@@ -9,9 +9,9 @@ import io.malykh.anton.base.ViewModelBase
 import io.malykh.anton.core.Core
 import io.malykh.anton.core.data.entity.Currency
 import io.malykh.anton.core.data.entity.CurrencyRate
-import io.malykh.anton.data.CurrencyMapper
+import io.malykh.anton.screens.currency_rates.data.CurrencyMapper
+import io.malykh.anton.screens.currency_rates.utils.asMoney
 import kotlinx.coroutines.*
-import java.text.DecimalFormat
 
 internal class CurrencyRatesViewModel(application: Application): ViewModelBase(application) {
 
@@ -24,6 +24,8 @@ internal class CurrencyRatesViewModel(application: Application): ViewModelBase(a
     private var currentEntryList = emptyList<CurrencyRateEntry>()
 
     private var baseCurrency = CurrencyRateEntry(mapper.map(CurrencyRate(Currency.EUR, 1f)), 1f)
+
+    private val entriesDiffCallback = CurrencyEntriesCallback()
 
     init {
         launch(Dispatchers.IO) {
@@ -40,6 +42,22 @@ internal class CurrencyRatesViewModel(application: Application): ViewModelBase(a
         baseCurrency = selectedEntry
     }
 
+    fun onBaseCurrencyAmountChanged(newValue: Float) {
+        baseCurrency = baseCurrency.withAmount(newValue)
+        val newEntries = currentEntryList.fold(
+            ArrayList<CurrencyRateEntry>(currentEntryList.size),
+            {
+                acc, currencyRateEntry ->
+                acc.add(
+                    currencyRateEntry.withAmount(
+                        (currencyRateEntry.currencyExt.currencyRate.rate * newValue).asMoney()))
+                acc
+            }
+        )
+        ratesLiveData.value = Diff(currentEntryList, newEntries, entriesDiffCallback)
+        currentEntryList = newEntries
+    }
+
     private suspend fun getCurrencyRates() {
         val base = baseCurrency
         val response = Core.get().requests.getCurrencyRatesRequest(base.currencyExt.currencyRate.currency).execute()
@@ -47,27 +65,28 @@ internal class CurrencyRatesViewModel(application: Application): ViewModelBase(a
             return
         val newEntries = mutableListOf(baseCurrency)
         response.getData()!!.forEach {
-            if (baseCurrency.currencyExt.currencyRate.currency != it.currency) {
-                newEntries.add(
-                    CurrencyRateEntry(
-                        mapper.map(it),
-                        String.format("%.2f", it.rate * baseCurrency.amount).toFloat()
-                    )
+            newEntries.add(
+                CurrencyRateEntry(
+                    mapper.map(it),
+                    (it.rate * baseCurrency.amount).asMoney()
                 )
-            }
+            )
         }
-        val diff = Diff(currentEntryList, newEntries, CurrencyEntriesCallback())
         withContext(Dispatchers.Main) {
+            val diff = Diff(currentEntryList, newEntries, entriesDiffCallback)
             ratesLiveData.value = diff
             currentEntryList = newEntries
         }
     }
 
-    private class CurrencyEntriesCallback : DiffUtil.ItemCallback<CurrencyRateEntry>() {
+    private inner class CurrencyEntriesCallback : DiffUtil.ItemCallback<CurrencyRateEntry>() {
         override fun areItemsTheSame(old: CurrencyRateEntry, new: CurrencyRateEntry): Boolean =
-            old.currencyExt.currencyRate.currency === new.currencyExt.currencyRate.currency
+            old.currencyExt.currencyRate.currency == new.currencyExt.currencyRate.currency
 
         override fun areContentsTheSame(old: CurrencyRateEntry, new: CurrencyRateEntry): Boolean {
+            if (old.currencyExt.currencyRate.currency == new.currencyExt.currencyRate.currency
+                && old.currencyExt.currencyRate.currency == baseCurrency.currencyExt.currencyRate.currency)
+                return true
             return old.amount == new.amount
         }
 
@@ -76,4 +95,6 @@ internal class CurrencyRatesViewModel(application: Application): ViewModelBase(a
         }
     }
 
+    private fun CurrencyRateEntry.withAmount(amount: Float): CurrencyRateEntry =
+        CurrencyRateEntry(this.currencyExt, amount)
 }
