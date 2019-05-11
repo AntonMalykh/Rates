@@ -17,12 +17,25 @@ abstract class ActivityBase<Model: ViewModel>(private val layoutId: Int): AppCom
         const val SHOW_KEYBOARD_RETRY_DELAY_MS = 100L
     }
 
-    protected abstract val viewModel: Model
     override val coroutineContext: CoroutineContext = Dispatchers.Main + Job()
+    protected abstract val viewModel: Model
+    private var recentContentHeight = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(layoutId)
+        findViewById<View>(android.R.id.content).apply {
+            viewTreeObserver.addOnGlobalLayoutListener {
+                val changedHeight = recentContentHeight - height
+                if (changedHeight != 0)
+                    onViewHeightChanged(changedHeight)
+                recentContentHeight = height
+            }
+        }
+    }
+
+    protected open fun onViewHeightChanged(changedBy: Int) {
+
     }
 
     override fun onPostCreate(savedInstanceState: Bundle?) {

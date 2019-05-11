@@ -8,21 +8,20 @@ import io.malykh.anton.base.AdapterBase
 import io.malykh.anton.base.ViewHolderBase
 import io.malykh.anton.presentation.R
 
-internal class CurrencyRatesAdapter
-    : AdapterBase<CurrencyRateEntry>() {
-
-    var onInputFocusChangedListener: ((EditText, Boolean) -> Unit)? = null
+internal class CurrencyRatesAdapter(onItemClickListener: ((CurrencyRateEntry) -> Unit)? = null,
+                                    private val onInputClickListener: ((EditText, CurrencyRateEntry) -> Unit)? = null)
+    : AdapterBase<CurrencyRateEntry>(onItemClickListener) {
 
     override fun onCreateViewHolder(viewParent: ViewGroup, viewType: Int): ViewHolderBase<CurrencyRateEntry> {
         return CurrencyRateViewHolder(
             viewParent,
             itemClickListener,
-            onInputFocusChangedListener)
+            onInputClickListener)
     }
 
     private class CurrencyRateViewHolder(parent: ViewGroup,
-                                         val itemClickListener: ((CurrencyRateEntry) -> Unit)?,
-                                         val onInputFocusChangedListener: ((EditText, Boolean) -> Unit)?)
+                                         val onItemClickListener: ((CurrencyRateEntry) -> Unit)? = null,
+                                         val onInputClickListener: ((EditText, CurrencyRateEntry) -> Unit)? = null)
         : ViewHolderBase<CurrencyRateEntry>(R.layout.item_currencies, parent) {
 
         val icon: ImageView = itemView.findViewById(R.id.icon)
@@ -31,16 +30,8 @@ internal class CurrencyRatesAdapter
         val value: EditText = itemView.findViewById(R.id.value)
 
         init {
-            itemView.setOnClickListener {
-                if (adapterPosition != 0)
-                    itemClickListener?.invoke(data)
-            }
-            itemView.setOnFocusChangeListener { _, hasFocus -> if (hasFocus) value.requestFocus() }
-            value.setOnFocusChangeListener { _, hasFocus ->
-                if (adapterPosition == 0) {
-                    onInputFocusChangedListener?.invoke(value, hasFocus)
-                }
-            }
+            itemView.setOnClickListener { onItemClickListener?.invoke(data) }
+            value.setOnClickListener { onInputClickListener?.invoke(value, data) }
         }
 
         override fun bind(item: CurrencyRateEntry) {
@@ -60,17 +51,8 @@ internal class CurrencyRatesAdapter
         }
 
         private fun applyAmount(amount: Float) {
-            value.setText(if (amount == 0f) null else amount.toString())
             value.apply{
-                setOnClickListener {
-                    if (adapterPosition == 0) {
-                        isFocusable = true
-                        isFocusableInTouchMode = true
-                        requestFocus()
-                    }
-                    else
-                        itemClickListener?.invoke(data)
-                }
+                setText(if (amount == 0f) null else amount.toString())
                 isFocusable = false
                 isFocusableInTouchMode = false
             }

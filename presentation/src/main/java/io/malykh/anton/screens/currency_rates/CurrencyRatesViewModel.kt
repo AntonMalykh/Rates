@@ -38,6 +38,8 @@ internal class CurrencyRatesViewModel(application: Application): ViewModelBase(a
 
     fun getRatesLiveData(): LiveData<Diff<CurrencyRateEntry>> = ratesLiveData
 
+    fun isBaseEntry(entry: CurrencyRateEntry) = entry == baseCurrency
+
     fun onCurrencySelected(selectedEntry: CurrencyRateEntry) {
         baseCurrency = selectedEntry
     }

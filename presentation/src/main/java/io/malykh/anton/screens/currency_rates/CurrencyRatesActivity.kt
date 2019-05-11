@@ -7,19 +7,25 @@ import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.text.*
 import android.view.View
+import android.view.View.GONE
 import android.widget.EditText
 import io.malykh.anton.base.ActivityBase
+import io.malykh.anton.base.Diff
 import io.malykh.anton.presentation.R
 import io.malykh.anton.screens.currency_rates.utils.asMoneyInput
 import kotlinx.android.synthetic.main.activity_currencies.*
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.text.DecimalFormatSymbols
 
-internal class CurrencyRatesActivity: ActivityBase<CurrencyRatesViewModel>(R.layout.activity_currencies) {
+internal class CurrencyRatesActivity : ActivityBase<CurrencyRatesViewModel>(R.layout.activity_currencies) {
 
-    override val viewModel: CurrencyRatesViewModel by lazy{
+    private companion object {
+        const val STATE_POSTPONE_KEYBOARD = "STATE_POSTPONE_KEYBOARD"
+        const val CHECK_SCROLL_STOPPED_DELAY_MS = 50L
+    }
+
+    override val viewModel: CurrencyRatesViewModel by lazy {
         ViewModelProviders.of(this).get(CurrencyRatesViewModel::class.java)
     }
 
@@ -27,70 +33,106 @@ internal class CurrencyRatesActivity: ActivityBase<CurrencyRatesViewModel>(R.lay
 
     private var postponeKeyboardOnBaseCurrency = false
 
-    private val adapter = CurrencyRatesAdapter().apply {
-        setOnItemClickedListener{
-            if (moneyInputWatcher.hasAttachedInput()) {
-                moneyInputWatcher.detachInput()
-                postponeKeyboardOnBaseCurrency = true
-            }
-            viewModel.onCurrencySelected(it)
-        }
-        onInputFocusChangedListener = { input, hasFocus ->
-            when {
-                hasFocus -> requestKeyboard(input){
-                    moneyInputWatcher.attachInput(input)
-                }
-                else -> {
-                    hideKeyboard()
-                    moneyInputWatcher.detachInput()
-                }
-            }
-        }
-    }
+    private val adapter = CurrencyRatesAdapter(this::onCurrencyItemClicked, this::onCurrencyInputClicked)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         currencies.adapter = adapter
+        savedInstanceState?.let {
+            postponeKeyboardOnBaseCurrency = it.getBoolean(STATE_POSTPONE_KEYBOARD)
+        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle?) {
+        super.onSaveInstanceState(outState)
+        outState?.putBoolean(STATE_POSTPONE_KEYBOARD, moneyInputWatcher.hasAttachedInput())
+    }
+
+    override fun onViewHeightChanged(changedBy: Int) {
+        super.onViewHeightChanged(changedBy)
+        if (changedBy < 0) {
+            root.requestFocus()
+        }
     }
 
     override fun onObserveData(viewModel: CurrencyRatesViewModel) {
         viewModel.getRatesLiveData().observe(
             this,
             Observer {
-                it?.let { value ->
-                    val atTop = (currencies.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition() == 0
-                    val firstItemOffset = when {
-                        atTop -> {
-                            currencies.getChildAt(0).height - currencies.getChildAt(0).bottom
-                        }
-                        else -> 0
-                    }
-                    adapter.setItems(value)
-                    if (atTop) {
-                        (currencies.layoutManager as LinearLayoutManager)
-                            .scrollToPositionWithOffset(0, -firstItemOffset)
-                        var started = true
-                        if (postponeKeyboardOnBaseCurrency) {
-                            launch {
-                                while (started || currencies.scrollState != RecyclerView.SCROLL_STATE_IDLE){
-                                    started = false
-                                    delay(50)
-                                }
-                                val input = findViewById<EditText>(R.id.value)
-                                input.callOnClick()
-                                input.setSelection(input.length())
-                            }
-                            postponeKeyboardOnBaseCurrency = false
-                        }
-                    }
-                }
+                it?.let { applyNewItems(it) }
             }
         )
+    }
+
+    private fun applyNewItems(newItems: Diff<CurrencyRateEntry>) {
+        processing.visibility = GONE
+        val atTop = (currencies.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition() == 0
+        val firstItemOffset = when {
+            atTop -> {
+                currencies.getChildAt(0).height - currencies.getChildAt(0).bottom
+            }
+            else -> 0
+        }
+        adapter.setItems(newItems)
+        if (atTop || postponeKeyboardOnBaseCurrency) {
+            (currencies.layoutManager as LinearLayoutManager)
+                .scrollToPositionWithOffset(0, -firstItemOffset)
+            var isScrollStart = true
+            if (postponeKeyboardOnBaseCurrency) {
+                launch {
+                    while (isScrollStart || currencies.scrollState != RecyclerView.SCROLL_STATE_IDLE) {
+
+                        isScrollStart = false
+                        delay(CHECK_SCROLL_STOPPED_DELAY_MS)
+                    }
+                    val input = findViewById<EditText>(R.id.value)
+                    input.callOnClick()
+                    input.setSelection(input.length())
+                }
+                postponeKeyboardOnBaseCurrency = false
+            }
+        }
+    }
+
+    private fun onCurrencyInputClicked(input: EditText, entry: CurrencyRateEntry) {
+        when {
+            viewModel.isBaseEntry(entry) -> {
+                moneyInputWatcher.attachInput(input)
+            }
+            else -> {
+                if (moneyInputWatcher.hasAttachedInput()) {
+                    moneyInputWatcher.detachInput()
+                }
+                postponeKeyboardOnBaseCurrency = true
+                viewModel.onCurrencySelected(entry)
+            }
+        }
+    }
+
+    private fun onCurrencyItemClicked(entry: CurrencyRateEntry) {
+        if (viewModel.isBaseEntry(entry)) {
+            return
+        }
+        if (moneyInputWatcher.hasAttachedInput()) {
+            moneyInputWatcher.detachInput()
+            postponeKeyboardOnBaseCurrency = true
+        }
+        viewModel.onCurrencySelected(entry)
     }
 
     private inner class MoneyInputWatcher {
 
         private var moneyInput: EditText? = null
+
+        private val focusChangeListener = View.OnFocusChangeListener { v, hasFocus ->
+            when {
+                hasFocus -> requestKeyboard(v)
+                else -> {
+                    hideKeyboard()
+                    detachInput()
+                }
+            }
+        }
 
         private val inputWatcher = object : TextWatcher {
             private var ignore = false
@@ -126,10 +168,12 @@ internal class CurrencyRatesActivity: ActivityBase<CurrencyRatesViewModel>(R.lay
             override fun onSpanAdded(text: Spannable?, what: Any?, start: Int, end: Int) {
                 onSpanChanged(text, what, -1, -1, start, end)
             }
+
             override fun onSpanChanged(text: Spannable?, what: Any?, ostart: Int, oend: Int, nstart: Int, nend: Int) {
                 moneyInput?.let {
                     if (what != Selection.SELECTION_END
-                        || it.selectionEnd != it.selectionStart) {
+                        || it.selectionEnd != it.selectionStart
+                    ) {
 
                         return
                     }
@@ -143,6 +187,14 @@ internal class CurrencyRatesActivity: ActivityBase<CurrencyRatesViewModel>(R.lay
         }
 
         fun attachInput(input: EditText) {
+            if (moneyInput == input)
+                return
+            detachInput()
+            input.isFocusable = true
+            input.isFocusableInTouchMode = true
+            requestKeyboard(input) {
+                input.onFocusChangeListener = focusChangeListener
+            }
             input.addTextChangedListener(inputWatcher)
             input.text.setSpan(selectionWatcher, 0, input.length(), Spanned.SPAN_INCLUSIVE_INCLUSIVE)
             moneyInput = input
@@ -153,6 +205,9 @@ internal class CurrencyRatesActivity: ActivityBase<CurrencyRatesViewModel>(R.lay
                 it.removeTextChangedListener(inputWatcher)
                 it.text.removeSpan(selectionWatcher)
                 it.clearFocus()
+                it.isFocusable = false
+                it.isFocusableInTouchMode = false
+                it.onFocusChangeListener = null
             }
             moneyInput = null
         }

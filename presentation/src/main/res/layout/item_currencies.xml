@@ -5,14 +5,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:focusable="true"
     android:paddingLeft="@dimen/offset_default"
     android:paddingRight="@dimen/offset_default"
     android:paddingTop="@dimen/offset_small"
     android:paddingBottom="@dimen/offset_small"
     android:background="?attr/selectableItemBackground">
 
-    <ImageView
+    <io.malykh.anton.base.SimpleCircleImageView
         android:id="@+id/icon"
         android:layout_width="@dimen/list_item_height_default"
         android:layout_height="@dimen/list_item_height_default"
@@ -20,6 +19,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         android:scaleType="centerCrop"
+        app:outlineWidth="1dp"
         tools:srcCompat="@tools:sample/avatars" />
 
     <TextView
