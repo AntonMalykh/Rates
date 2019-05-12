@@ -3,8 +3,11 @@ package io.malykh.anton.base
 import android.arch.lifecycle.ViewModel
 import android.content.Context
 import android.os.Bundle
+import android.support.v4.app.ActivityCompat
+import android.support.v4.content.ContextCompat
 import android.support.v4.view.ViewCompat
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.app.AppCompatDelegate
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import io.malykh.anton.presentation.R
@@ -23,6 +26,7 @@ abstract class ActivityBase<Model: ViewModel>(private val layoutId: Int): AppCom
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
         setContentView(layoutId)
         findViewById<View>(android.R.id.content).apply {
             viewTreeObserver.addOnGlobalLayoutListener {

@@ -3,4 +3,5 @@
     <dimen name="list_item_height_default">56dp</dimen>
     <dimen name="offset_default">16dp</dimen>
     <dimen name="offset_small">8dp</dimen>
+    <dimen name="outline_default">1dp</dimen>
 </resources>

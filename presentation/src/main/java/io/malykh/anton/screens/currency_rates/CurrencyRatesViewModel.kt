@@ -9,6 +9,7 @@ import io.malykh.anton.base.ViewModelBase
 import io.malykh.anton.core.Core
 import io.malykh.anton.core.data.entity.Currency
 import io.malykh.anton.core.data.entity.CurrencyRate
+import io.malykh.anton.screens.currency_rates.data.CurrencyExt
 import io.malykh.anton.screens.currency_rates.data.CurrencyMapper
 import io.malykh.anton.screens.currency_rates.utils.asMoney
 import kotlinx.coroutines.*
@@ -21,11 +22,12 @@ internal class CurrencyRatesViewModel(application: Application): ViewModelBase(a
 
     private val ratesLiveData = MutableLiveData<Diff<CurrencyRateEntry>>()
     private val mapper: CurrencyMapper by lazy { CurrencyMapper((getApplication() as Application).resources) }
-    private var currentEntryList = emptyList<CurrencyRateEntry>()
-
-    private var baseCurrency = CurrencyRateEntry(mapper.map(CurrencyRate(Currency.EUR, 1f)), 1f)
-
     private val entriesDiffCallback = CurrencyEntriesCallback()
+
+    private var currentEntryList = emptyList<CurrencyRateEntry>()
+    private var baseCurrency = CurrencyRateEntry(mapper.map(CurrencyRate(Currency.EUR, 1f)), 1f)
+    private var requestedBaseCurrency: CurrencyRateEntry? = null
+    private var baseCurrencyChangeTimeStamp = 0L
 
     init {
         launch(Dispatchers.IO) {
@@ -38,14 +40,16 @@ internal class CurrencyRatesViewModel(application: Application): ViewModelBase(a
 
     fun getRatesLiveData(): LiveData<Diff<CurrencyRateEntry>> = ratesLiveData
 
-    fun isBaseEntry(entry: CurrencyRateEntry) = entry == baseCurrency
+    fun isBaseEntry(entry: CurrencyRateEntry) =
+        entry.currencyExt.currencyRate.currency == baseCurrency.currencyExt.currencyRate.currency
 
     fun onCurrencySelected(selectedEntry: CurrencyRateEntry) {
-        baseCurrency = selectedEntry
+        requestedBaseCurrency = selectedEntry
     }
 
     fun onBaseCurrencyAmountChanged(newValue: Float) {
         baseCurrency = baseCurrency.withAmount(newValue)
+        baseCurrencyChangeTimeStamp = System.currentTimeMillis()
         val newEntries = currentEntryList.fold(
             ArrayList<CurrencyRateEntry>(currentEntryList.size),
             {
@@ -61,20 +65,26 @@ internal class CurrencyRatesViewModel(application: Application): ViewModelBase(a
     }
 
     private suspend fun getCurrencyRates() {
-        val base = baseCurrency
+        val requestTimeStamp = System.currentTimeMillis()
+        val base = requestedBaseCurrency ?: baseCurrency
         val response = Core.get().requests.getCurrencyRatesRequest(base.currencyExt.currencyRate.currency).execute()
         if (response.hasError() || response.getData() == null)
             return
-        val newEntries = mutableListOf(baseCurrency)
-        response.getData()!!.forEach {
-            newEntries.add(
-                CurrencyRateEntry(
-                    mapper.map(it),
-                    (it.rate * baseCurrency.amount).asMoney()
-                )
-            )
-        }
         withContext(Dispatchers.Main) {
+            requestedBaseCurrency = null
+            if (baseCurrencyChangeTimeStamp > requestTimeStamp)
+                return@withContext
+            if (baseCurrency != base)
+                baseCurrency = base.withRate(1f)
+            val newEntries = mutableListOf(baseCurrency)
+            response.getData()!!.forEach {
+                newEntries.add(
+                    CurrencyRateEntry(
+                        mapper.map(it),
+                        (it.rate * baseCurrency.amount).asMoney()
+                    )
+                )
+            }
             val diff = Diff(currentEntryList, newEntries, entriesDiffCallback)
             ratesLiveData.value = diff
             currentEntryList = newEntries
@@ -99,4 +109,19 @@ internal class CurrencyRatesViewModel(application: Application): ViewModelBase(a
 
     private fun CurrencyRateEntry.withAmount(amount: Float): CurrencyRateEntry =
         CurrencyRateEntry(this.currencyExt, amount)
+
+    private fun CurrencyRateEntry.withRate(rate: Float): CurrencyRateEntry {
+        return CurrencyRateEntry(
+            CurrencyExt(
+                CurrencyRate(
+                    this.currencyExt.currencyRate.currency,
+                    rate
+                ),
+                this.currencyExt.localizedDescription,
+                this.currencyExt.flag
+            ),
+            this.amount
+        )
+    }
+
 }

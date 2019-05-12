@@ -5,18 +5,20 @@ import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
-import android.text.*
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.View
 import android.view.View.GONE
 import android.widget.EditText
 import io.malykh.anton.base.ActivityBase
 import io.malykh.anton.base.Diff
 import io.malykh.anton.presentation.R
-import io.malykh.anton.screens.currency_rates.utils.asMoneyInput
+import io.malykh.anton.screens.currency_rates.utils.MoneyInputFormatter
+import io.malykh.anton.screens.currency_rates.utils.asMoney
+import io.malykh.anton.screens.currency_rates.utils.asMoneyString
 import kotlinx.android.synthetic.main.activity_currencies.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.text.DecimalFormatSymbols
 
 internal class CurrencyRatesActivity : ActivityBase<CurrencyRatesViewModel>(R.layout.activity_currencies) {
 
@@ -30,10 +32,9 @@ internal class CurrencyRatesActivity : ActivityBase<CurrencyRatesViewModel>(R.la
     }
 
     private val moneyInputWatcher by lazy { MoneyInputWatcher() }
+    private val adapter = CurrencyRatesAdapter(this::onCurrencyItemClicked, this::onCurrencyInputClicked)
 
     private var postponeKeyboardOnBaseCurrency = false
-
-    private val adapter = CurrencyRatesAdapter(this::onCurrencyItemClicked, this::onCurrencyInputClicked)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -85,9 +86,13 @@ internal class CurrencyRatesActivity : ActivityBase<CurrencyRatesViewModel>(R.la
                         isScrollStart = false
                         delay(CHECK_SCROLL_STOPPED_DELAY_MS)
                     }
-                    val input = findViewById<EditText>(R.id.value)
-                    input.callOnClick()
-                    input.setSelection(input.length())
+
+
+
+                    currencies
+                        .getChildAt(0)?.let {
+                            CurrencyRateViewHolder.callOnInputClick(it)
+                        }
                 }
                 postponeKeyboardOnBaseCurrency = false
             }
@@ -123,6 +128,7 @@ internal class CurrencyRatesActivity : ActivityBase<CurrencyRatesViewModel>(R.la
     private inner class MoneyInputWatcher {
 
         private var moneyInput: EditText? = null
+        private val moneyFormatter = MoneyInputFormatter()
 
         private val focusChangeListener = View.OnFocusChangeListener { v, hasFocus ->
             when {
@@ -144,46 +150,23 @@ internal class CurrencyRatesActivity : ActivityBase<CurrencyRatesViewModel>(R.la
                 }
                 s?.let {
                     ignore = true
-                    val newValue = s.toString().asMoneyInput()
+                    var selectionIndexFix = 0
+                    val newValue = moneyFormatter.formatMoneyInput(s){
+                        selectionIndexFix++
+                    }
                     moneyInput?.let {
-                        val selection = when {
-                            newValue != null && isDecimalSeparatorBeforeSelection(newValue, it.selectionEnd) -> {
-                                it.selectionEnd - 1
-                            }
-                            else -> it.selectionEnd
-                        }
+                        val selection = it.selectionEnd + selectionIndexFix
                         it.setText(newValue)
                         it.setSelection(Math.min(selection, it.length()))
-                        it.text.setSpan(selectionWatcher, 0, it.length(), Spanned.SPAN_INCLUSIVE_INCLUSIVE)
                     }
-                    val floatValue = if (newValue.isNullOrEmpty()) 0f else newValue.toFloat()
+                    val floatValue = when{
+                        newValue.isEmpty() -> 0f
+                        else -> newValue.asMoney()
+                    }
                     viewModel.onBaseCurrencyAmountChanged(floatValue)
                     ignore = false
                 }
             }
-        }
-
-        private val selectionWatcher = object : SpanWatcher {
-            override fun onSpanRemoved(text: Spannable?, what: Any?, start: Int, end: Int) {}
-            override fun onSpanAdded(text: Spannable?, what: Any?, start: Int, end: Int) {
-                onSpanChanged(text, what, -1, -1, start, end)
-            }
-
-            override fun onSpanChanged(text: Spannable?, what: Any?, ostart: Int, oend: Int, nstart: Int, nend: Int) {
-                moneyInput?.let {
-                    if (what != Selection.SELECTION_END
-                        || it.selectionEnd != it.selectionStart
-                    ) {
-
-                        return
-                    }
-
-                    if (isDecimalSeparatorBeforeSelection(it.text.toString(), nstart)) {
-                        it.setSelection(nstart - 1)
-                    }
-                }
-            }
-
         }
 
         fun attachInput(input: EditText) {
@@ -192,18 +175,18 @@ internal class CurrencyRatesActivity : ActivityBase<CurrencyRatesViewModel>(R.la
             detachInput()
             input.isFocusable = true
             input.isFocusableInTouchMode = true
+            input.setSelection(input.length())
             requestKeyboard(input) {
                 input.onFocusChangeListener = focusChangeListener
             }
             input.addTextChangedListener(inputWatcher)
-            input.text.setSpan(selectionWatcher, 0, input.length(), Spanned.SPAN_INCLUSIVE_INCLUSIVE)
             moneyInput = input
         }
 
         fun detachInput() {
             moneyInput?.let {
                 it.removeTextChangedListener(inputWatcher)
-                it.text.removeSpan(selectionWatcher)
+                it.setText(it.text.toString().asMoneyString())
                 it.clearFocus()
                 it.isFocusable = false
                 it.isFocusableInTouchMode = false
@@ -213,12 +196,5 @@ internal class CurrencyRatesActivity : ActivityBase<CurrencyRatesViewModel>(R.la
         }
 
         fun hasAttachedInput() = moneyInput != null
-
-        private fun isDecimalSeparatorBeforeSelection(inputText: CharSequence, position: Int): Boolean {
-            return position > 0
-                    && position < inputText.length
-                    && inputText[position - 1] == DecimalFormatSymbols.getInstance().decimalSeparator
-        }
-
     }
 }

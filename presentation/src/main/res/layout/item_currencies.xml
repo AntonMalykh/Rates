@@ -11,55 +11,75 @@
     android:paddingBottom="@dimen/offset_small"
     android:background="?attr/selectableItemBackground">
 
-    <io.malykh.anton.base.SimpleCircleImageView
+    <io.malykh.anton.base.CircleImageView
         android:id="@+id/icon"
         android:layout_width="@dimen/list_item_height_default"
         android:layout_height="@dimen/list_item_height_default"
+        android:scaleType="centerCrop"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/constraintLayout"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:scaleType="centerCrop"
-        app:outlineWidth="1dp"
+        app:outlineWidth="@dimen/outline_default"
         tools:srcCompat="@tools:sample/avatars" />
 
-    <TextView
-        android:id="@+id/name"
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/constraintLayout"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:layout_marginStart="@dimen/offset_small"
         android:layout_marginEnd="@dimen/offset_small"
-        app:layout_constraintBottom_toTopOf="@+id/description"
-        app:layout_constraintEnd_toStartOf="@+id/value"
-        app:layout_constraintStart_toEndOf="@+id/icon"
         app:layout_constraintTop_toTopOf="parent"
-        android:gravity="start|center_vertical"
-        android:textColor="?android:textColorPrimary"
-        android:textAllCaps="true"
-        tools:text="GBP"/>
-
-    <TextView
-        android:id="@+id/description"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/offset_small"
-        android:layout_marginEnd="@dimen/offset_small"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/value"
-        app:layout_constraintStart_toEndOf="@+id/icon"
-        app:layout_constraintTop_toBottomOf="@+id/name"
-        android:gravity="start|center_vertical"
-        android:textColor="?android:textColorHint"
-        tools:text="British Pound"/>
+        app:layout_constraintStart_toEndOf="@+id/icon">
+
+        <TextView
+            android:id="@+id/name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/offset_small"
+            android:layout_marginEnd="@dimen/offset_small"
+            android:gravity="start|center_vertical"
+            android:textAllCaps="true"
+            android:textColor="?android:textColorPrimary"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/description"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="GBP" />
+
+        <TextView
+            android:id="@+id/description"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/offset_small"
+            android:layout_marginEnd="@dimen/offset_small"
+            android:gravity="start|center_vertical"
+            android:textColor="?android:textColorHint"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/name"
+            tools:text="British Pound" />
+
+    </android.support.constraint.ConstraintLayout>
+
 
     <EditText
         android:id="@+id/value"
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/currency_amount_hint"
         android:imeOptions="flagNoExtractUi|flagNoFullscreen|actionDone"
         android:inputType="numberDecimal"
+        android:digits="0123456789.,"
+        android:lines="1"
+        android:singleLine="true"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:hint="@string/currency_amount_hint"
-        tools:text="12,33" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/constraintLayout"
+        android:maxEms="5"
+        tools:text="1233,33" />
 </android.support.constraint.ConstraintLayout>
