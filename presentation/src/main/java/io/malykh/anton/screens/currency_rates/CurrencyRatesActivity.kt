@@ -1,6 +1,7 @@
 package io.malykh.anton.screens.currency_rates
 
 import android.arch.lifecycle.Observer
+import android.arch.lifecycle.ViewModelProvider
 import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
@@ -12,6 +13,7 @@ import android.view.View.GONE
 import android.widget.EditText
 import io.malykh.anton.base.ActivityBase
 import io.malykh.anton.base.Diff
+import io.malykh.anton.base.ViewModelFactoryImpl
 import io.malykh.anton.presentation.R
 import io.malykh.anton.screens.currency_rates.utils.MoneyInputFormatter
 import io.malykh.anton.screens.currency_rates.utils.asMoney
@@ -28,7 +30,7 @@ internal class CurrencyRatesActivity : ActivityBase<CurrencyRatesViewModel>(R.la
     }
 
     override val viewModel: CurrencyRatesViewModel by lazy {
-        ViewModelProviders.of(this).get(CurrencyRatesViewModel::class.java)
+        ViewModelProviders.of(this, ViewModelFactoryImpl(application)).get(CurrencyRatesViewModel::class.java)
     }
 
     private val moneyInputWatcher by lazy { MoneyInputWatcher() }

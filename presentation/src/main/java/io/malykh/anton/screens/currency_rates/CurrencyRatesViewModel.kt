@@ -6,7 +6,7 @@ import android.arch.lifecycle.MutableLiveData
 import android.support.v7.util.DiffUtil
 import io.malykh.anton.base.Diff
 import io.malykh.anton.base.ViewModelBase
-import io.malykh.anton.core.Core
+import io.malykh.anton.core.Requests
 import io.malykh.anton.core.data.entity.Currency
 import io.malykh.anton.core.data.entity.CurrencyRate
 import io.malykh.anton.screens.currency_rates.data.CurrencyExt
@@ -14,7 +14,7 @@ import io.malykh.anton.screens.currency_rates.data.CurrencyMapper
 import io.malykh.anton.screens.currency_rates.utils.asMoney
 import kotlinx.coroutines.*
 
-internal class CurrencyRatesViewModel(application: Application): ViewModelBase(application) {
+internal class CurrencyRatesViewModel(private val requests: Requests, application: Application): ViewModelBase(application) {
 
     private companion object {
         const val DELAY_GET_CURRENCY_RATES_MS: Long = 1 * 1000
@@ -30,7 +30,7 @@ internal class CurrencyRatesViewModel(application: Application): ViewModelBase(a
     private var baseCurrencyChangeTimeStamp = 0L
 
     init {
-        launch(Dispatchers.IO) {
+        launch {
             while (isActive) {
                 getCurrencyRates()
                 delay(DELAY_GET_CURRENCY_RATES_MS)
@@ -67,7 +67,7 @@ internal class CurrencyRatesViewModel(application: Application): ViewModelBase(a
     private suspend fun getCurrencyRates() {
         val requestTimeStamp = System.currentTimeMillis()
         val base = requestedBaseCurrency ?: baseCurrency
-        val response = Core.get().requests.getCurrencyRatesRequest(base.currencyExt.currencyRate.currency).execute()
+        val response = requests.getCurrencyRatesRequest(base.currencyExt.currencyRate.currency).execute()
         if (response.hasError() || response.getData() == null)
             return
         withContext(Dispatchers.Main) {
