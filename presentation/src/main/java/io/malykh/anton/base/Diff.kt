@@ -2,9 +2,13 @@ package io.malykh.anton.base
 
 import android.support.v7.util.DiffUtil
 
-internal class Diff<Item>(oldItems: List<Item>,
-                          val newItems: List<Item>,
-                          itemCallback: DiffUtil.ItemCallback<Item>) {
+/**
+ * Used for applying [newItems] to a recyclerview.
+ * [diffResult] is used for easily updating of view holders
+ */
+class Diff<Item>(oldItems: List<Item>,
+                 val newItems: List<Item>,
+                 itemCallback: DiffUtil.ItemCallback<Item>) {
 
     val diffResult: DiffUtil.DiffResult =
         DiffUtil.calculateDiff(

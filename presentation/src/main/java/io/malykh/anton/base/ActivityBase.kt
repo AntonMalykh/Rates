@@ -14,6 +14,11 @@ import io.malykh.anton.presentation.R
 import kotlinx.coroutines.*
 import kotlin.coroutines.CoroutineContext
 
+/**
+ * Base activity implementation.
+ * Valid [layoutId] should be passed to be inflated as content view
+ * [Model] is view model type that is used with an extender
+ */
 abstract class ActivityBase<Model: ViewModel>(private val layoutId: Int): AppCompatActivity(), CoroutineScope {
 
     private companion object {
@@ -21,7 +26,11 @@ abstract class ActivityBase<Model: ViewModel>(private val layoutId: Int): AppCom
     }
 
     override val coroutineContext: CoroutineContext = Dispatchers.Main + Job()
+    /**
+     * [ViewModel] implementation
+     */
     protected abstract val viewModel: Model
+
     private var recentContentHeight = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -38,6 +47,10 @@ abstract class ActivityBase<Model: ViewModel>(private val layoutId: Int): AppCom
         }
     }
 
+    /**
+     * Called when height of the view is changed.
+     * For example when keyboard appears or disappears.
+     */
     protected open fun onViewHeightChanged(changedBy: Int) {
 
     }
@@ -47,8 +60,15 @@ abstract class ActivityBase<Model: ViewModel>(private val layoutId: Int): AppCom
         onObserveData(viewModel)
     }
 
+    /**
+     * Here is the place where [viewModel] can be observed.
+     */
     protected abstract fun onObserveData(viewModel: Model)
 
+    /**
+     * Shows the soft keyboard and focuses the [view].
+     * [onKeyboardShown] is called when keyboard is completely shown
+     */
     protected fun requestKeyboard(view: View, onKeyboardShown: (() -> Unit)? = null) {
         launch {
             while(!ViewCompat.isLaidOut(view))
@@ -60,6 +80,9 @@ abstract class ActivityBase<Model: ViewModel>(private val layoutId: Int): AppCom
         }
     }
 
+    /**
+     * Hides the soft keyboard
+     */
     protected fun hideKeyboard() {
         (getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager)
             .hideSoftInputFromWindow(findViewById<View>(android.R.id.content).windowToken, 0)

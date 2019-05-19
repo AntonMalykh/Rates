@@ -9,6 +9,9 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlin.coroutines.CoroutineContext
 
+/**
+ * Base [ViewModel] implementation.
+ */
 abstract class ViewModelBase(application: Application): AndroidViewModel(application), CoroutineScope {
 
     override val coroutineContext: CoroutineContext = Dispatchers.IO + Job()

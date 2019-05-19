@@ -14,14 +14,20 @@ import io.malykh.anton.screens.currency_rates.data.CurrencyMapper
 import io.malykh.anton.screens.currency_rates.utils.asMoney
 import kotlinx.coroutines.*
 
-internal class CurrencyRatesViewModel(private val requests: Requests, application: Application): ViewModelBase(application) {
+/**
+ * [ViewModelBase] that is used for rendering list of currencies.
+ * @param requests is used for updating currencies.
+ */
+internal class CurrencyRatesViewModel(application: Application,
+                                      private val requests: Requests)
+    : ViewModelBase(application) {
 
     private companion object {
         const val DELAY_GET_CURRENCY_RATES_MS: Long = 1 * 1000
     }
 
     private val ratesLiveData = MutableLiveData<Diff<CurrencyRateEntry>>()
-    private val mapper: CurrencyMapper by lazy { CurrencyMapper((getApplication() as Application).resources) }
+    private val mapper: CurrencyMapper by lazy { CurrencyMapper(application.resources) }
     private val entriesDiffCallback = CurrencyEntriesCallback()
 
     private var currentEntryList = emptyList<CurrencyRateEntry>()
@@ -38,15 +44,27 @@ internal class CurrencyRatesViewModel(private val requests: Requests, applicatio
         }
     }
 
+    /**
+     * Provides Live data that exposes updates of the list of currencies
+     */
     fun getRatesLiveData(): LiveData<Diff<CurrencyRateEntry>> = ratesLiveData
 
+    /**
+     * Checks whether the given [entry] is currently the base one
+     */
     fun isBaseEntry(entry: CurrencyRateEntry) =
         entry.currencyExt.currencyRate.currency == baseCurrency.currencyExt.currencyRate.currency
 
+    /**
+     * Callback to be invoked when used selected an entry from the list.
+     */
     fun onCurrencySelected(selectedEntry: CurrencyRateEntry) {
         requestedBaseCurrency = selectedEntry
     }
 
+    /**
+     * Callback to be invoked when used changes the amount of the base currency
+     */
     fun onBaseCurrencyAmountChanged(newValue: Float) {
         baseCurrency = baseCurrency.withAmount(newValue)
         baseCurrencyChangeTimeStamp = System.currentTimeMillis()

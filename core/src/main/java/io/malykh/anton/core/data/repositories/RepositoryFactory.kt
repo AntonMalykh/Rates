@@ -4,17 +4,23 @@ import io.malykh.anton.core.data.repositories.currency_rates.CurrencyRatesReposi
 import io.malykh.anton.core.data.repositories.currency_rates.CurrencyRatesRepositoryImpl
 import kotlin.reflect.KClass
 
+/**
+ * Factory for obtaining implementations of the [RepositoryBase]
+ */
 internal class RepositoryFactory {
 
     private val repoMap: MutableMap<KClass<out RepositoryBase>, in RepositoryBase> = mutableMapOf()
 
-    inline fun <reified T: RepositoryBase> get(type: KClass<T>): T {
-        return when (type) {
+    /**
+     * Provides an implementation of the given [repositoryType].
+     */
+    inline fun <reified T: RepositoryBase> get(repositoryType: KClass<T>): T {
+        return when (repositoryType) {
             CurrencyRatesRepository::class -> {
-                if (repoMap[type] == null) {
-                    repoMap[type] = CurrencyRatesRepositoryImpl()
+                if (repoMap[repositoryType] == null) {
+                    repoMap[repositoryType] = CurrencyRatesRepositoryImpl()
                 }
-                repoMap[type] as T
+                repoMap[repositoryType] as T
             }
             else -> throw Exception("UNSUPPORTED REPOSITORY CLASS")
         }

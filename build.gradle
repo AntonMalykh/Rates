@@ -32,10 +32,10 @@ ext{
     //production
     kotlinVersion = kotlin_version
     kotlinCoroutinesVersion = '1.1.1'
-    supportAppcomatVersion = '28.0.0'
 
     //tests
-    jUnitVesion = '4.12'
+    jUnitVersion = '4.12'
     instrumentationTestRunnerVersion = '1.0.2'
-    espressoCoreVersion = '3.0.2'
+    mockitoCoreVerion = '2.27.0'
+    kotlinCoroutinesTestVersion = '1.2.1'
 }

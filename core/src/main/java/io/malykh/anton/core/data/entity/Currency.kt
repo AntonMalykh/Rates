@@ -1,6 +1,9 @@
 package io.malykh.anton.core.data.entity
 
-public enum class Currency {
+import io.malykh.anton.core.EnumMockHelper
+
+
+public enum class Currency: EnumMockHelper<Currency> {
     EUR,
     AUD,
     BGN,
@@ -33,5 +36,10 @@ public enum class Currency {
     THB,
     TRY,
     USD,
-    ZAR
+    ZAR;
+
+    override fun get(): Currency {
+        return this
+    }
 }
+

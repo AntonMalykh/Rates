@@ -9,6 +9,9 @@ import io.malykh.anton.base.ViewHolderBase
 import io.malykh.anton.presentation.R
 import io.malykh.anton.screens.currency_rates.utils.asMoneyString
 
+/**
+ * [ViewHolderBase] that renders an item of the list of currencies.
+ */
 internal class CurrencyRateViewHolder(parent: ViewGroup,
                                      val onItemClickListener: ((CurrencyRateEntry) -> Unit)? = null,
                                      val onInputClickListener: ((EditText, CurrencyRateEntry) -> Unit)? = null)

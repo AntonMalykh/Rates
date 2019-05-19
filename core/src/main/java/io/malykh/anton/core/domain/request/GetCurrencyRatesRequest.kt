@@ -8,9 +8,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 
+/**
+ * Request that obtains currency rates list based on the given [baseCurrency].
+ * Uses [repository] for obtaining the result.
+ */
 internal class GetCurrencyRatesRequest(repository: CurrencyRatesRepository,
-                                       private val baseCurrency: Currency
-)
+                                       private val baseCurrency: Currency)
     : RequestBase<CurrencyRatesRepository, List<CurrencyRate>>(repository) {
 
     override suspend fun run(repository: CurrencyRatesRepository): Response<List<CurrencyRate>> {

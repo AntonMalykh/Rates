@@ -9,6 +9,9 @@ private val moneyFormat = DecimalFormat("0.00").apply {
     decimalFormatSymbols = DecimalFormatSymbols.getInstance()
 }
 
+/**
+ * Formats the given string as money string using predefined rules
+ */
 fun String.asMoneyString(): String {
     return when (val moneyValue = this.asMoney()) {
         0f -> ""
@@ -16,8 +19,14 @@ fun String.asMoneyString(): String {
     }
 }
 
+/**
+ * Formats the given string as money string using predefined rules
+ */
 fun Float.asMoneyString(): String = moneyFormat.formatFloatLocalized(this)
 
+/**
+ * Formats the given value as money float value using predefined rules
+ */
 fun Float.asMoney(): Float {
     if (this == 0f) return 0f
     return moneyFormat
@@ -26,6 +35,9 @@ fun Float.asMoney(): Float {
         .toFloat()
 }
 
+/**
+ * Formats the given string as money float value using predefined rules
+ */
 fun String.asMoney(): Float {
     val withSeparator = this.replace(moneyFormat.decimalFormatSymbols.decimalSeparator.toString(), ".")
     return when (val moneyValue = withSeparator.toFloatOrNull()){
@@ -39,6 +51,9 @@ private fun DecimalFormat.formatFloatLocalized(float: Float): String {
     return this.format(float)
 }
 
+/**
+ * Helper for formatting the user input as money input
+ */
 internal class MoneyInputFormatter {
 
     private companion object {
@@ -52,6 +67,10 @@ internal class MoneyInputFormatter {
         acceptedChars[acceptedChars.size - 1] = moneyFormat.decimalFormatSymbols.decimalSeparator
     }
 
+    /**
+     * Formats ghe given [input] as money.
+     * [onCharSubstituted] is called when a new char that is not contained in the [input] is inserted during the formatting.
+     */
     fun formatMoneyInput(input: CharSequence, onCharSubstituted: (() -> Unit)? = null): String {
 
         if (input.isEmpty())

@@ -17,6 +17,10 @@ import java.io.InputStreamReader
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
+/**
+ * Network based implementation of the [CurrencyRatesRepository].
+ * Uses [Retrofit] for network calls.
+ */
 internal class CurrencyRatesRepositoryImpl:
     CurrencyRatesRepository{
 

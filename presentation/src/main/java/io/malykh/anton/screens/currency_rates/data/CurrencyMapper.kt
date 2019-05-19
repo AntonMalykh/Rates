@@ -8,6 +8,9 @@ import io.malykh.anton.core.data.entity.Currency.*
 import io.malykh.anton.core.data.entity.CurrencyRate
 import io.malykh.anton.presentation.R
 
+/**
+ * Maps [CurrencyRate] into [CurrencyExt]
+ */
 internal class CurrencyMapper(private val resources: Resources): DataMapper<CurrencyRate, CurrencyExt> {
 
     override fun map(from: CurrencyRate): CurrencyExt =

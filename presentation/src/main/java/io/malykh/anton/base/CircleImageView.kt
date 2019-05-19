@@ -8,7 +8,12 @@ import android.util.AttributeSet
 import android.widget.ImageView
 import io.malykh.anton.presentation.R
 
-internal class CircleImageView @JvmOverloads constructor(context: Context,
+/**
+ * Image view that renders image of the circle shape.
+ *
+ * [R.styleable.CircleImageView_outlineWidth] can be changed to apply outline width to the circle (0 is used by default)
+ */
+class CircleImageView @JvmOverloads constructor(context: Context,
                                                          attrs: AttributeSet? = null,
                                                          defStyleAttr: Int = 0)
     : ImageView(context, attrs, defStyleAttr) {

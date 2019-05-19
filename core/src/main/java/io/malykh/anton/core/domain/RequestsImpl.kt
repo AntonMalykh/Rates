@@ -8,6 +8,11 @@ import io.malykh.anton.core.data.repositories.RepositoryFactory
 import io.malykh.anton.core.domain.request.GetCurrencyRatesRequest
 import io.malykh.anton.core.domain.request.Request
 
+/**
+ * Internal [Requests] implementation.
+ *
+ * [repositoryFactory] is used for providing repository instance that is needed for the particular request.
+ */
 internal class RequestsImpl internal constructor (private val repositoryFactory: RepositoryFactory) : Requests {
 
     override fun getCurrencyRatesRequest(baseCurrency: Currency): Request<List<CurrencyRate>> {
