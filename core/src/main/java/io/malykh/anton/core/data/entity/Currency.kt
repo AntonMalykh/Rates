@@ -1,7 +1,5 @@
 package io.malykh.anton.core.data.entity
 
-import io.malykh.anton.core.EnumMockHelper
-
 
 public enum class Currency{
     EUR,
