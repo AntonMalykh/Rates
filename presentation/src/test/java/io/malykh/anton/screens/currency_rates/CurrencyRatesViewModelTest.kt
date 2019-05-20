@@ -7,7 +7,6 @@ import android.graphics.drawable.BitmapDrawable
 import io.malykh.anton.core.Requests
 import io.malykh.anton.core.data.entity.Currency
 import io.malykh.anton.core.data.entity.CurrencyRate
-import io.malykh.anton.core.EnumMockHelper
 import io.malykh.anton.core.domain.request.Request
 import io.malykh.anton.core.domain.response.CoreError
 import io.malykh.anton.core.domain.response.Response
@@ -59,9 +58,7 @@ class CurrencyRatesViewModelTest {
             })
         }
         for (cur in Currency.values()) {
-            val mock = mock(EnumMockHelper::class.java) as EnumMockHelper<Currency>
-            `when`(mock.get()).thenReturn(cur)
-            `when`(requestsMock.getCurrencyRatesRequest(mock.get())).thenReturn(getCurrenciesRequestMock as Request<List<CurrencyRate>>?)
+            `when`(requestsMock.getCurrencyRatesRequest(cur)).thenReturn(getCurrenciesRequestMock as Request<List<CurrencyRate>>?)
         }
 
         val resourcesMock = mock(Resources::class.java)
