@@ -18,7 +18,7 @@ import kotlinx.coroutines.*
  * [ViewModelBase] that is used for rendering list of currencies.
  * @param requests is used for updating currencies.
  */
-internal class CurrencyRatesViewModel(application: Application,
+class CurrencyRatesViewModel(application: Application,
                                       private val requests: Requests)
     : ViewModelBase(application) {
 

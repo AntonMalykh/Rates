@@ -22,7 +22,7 @@ import kotlinx.android.synthetic.main.activity_currencies.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-internal class CurrencyRatesActivity : ActivityBase<CurrencyRatesViewModel>(R.layout.activity_currencies) {
+class CurrencyRatesActivity : ActivityBase<CurrencyRatesViewModel>(R.layout.activity_currencies) {
 
     private companion object {
         const val STATE_POSTPONE_KEYBOARD = "STATE_POSTPONE_KEYBOARD"

@@ -5,7 +5,7 @@ import io.malykh.anton.core.data.entity.CurrencyRate
 import io.malykh.anton.core.domain.request.Request
 
 /**
- * Requests that are available to be made via [Core]
+ * Requests that are available to be made via [CoreImpl]
  */
 public interface Requests {
     /**
