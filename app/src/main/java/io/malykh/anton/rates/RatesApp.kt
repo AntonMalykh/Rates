@@ -9,15 +9,13 @@ import javax.inject.Singleton
 
 class RatesApp : DaggerApplication(){
 
-    @Inject
-    @Singleton
-    lateinit var core: Core
-
     override fun onCreate() {
         super.onCreate()
     }
 
     override fun applicationInjector(): AndroidInjector<out DaggerApplication> {
-        return DaggerAppComponent.factory().create(this)
+        return DaggerAppComponent
+            .factory()
+            .create(this)
     }
 }

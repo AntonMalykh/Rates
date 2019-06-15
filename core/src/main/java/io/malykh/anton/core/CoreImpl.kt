@@ -1,9 +1,11 @@
 package io.malykh.anton.core
 
+import dagger.Component
 import io.malykh.anton.core.data.entity.Currency
 import io.malykh.anton.core.data.entity.CurrencyRate
 import io.malykh.anton.core.domain.RequestsImpl
 import io.malykh.anton.core.data.repositories.RepositoryFactory
+import io.malykh.anton.core.di.CoreComponent
 import io.malykh.anton.core.domain.request.Request
 
 /**
@@ -18,5 +20,9 @@ public class CoreImpl: Core {
 
     override fun getRequests(): Requests {
         return requestsImpl
+    }
+
+    override fun getComponent(): CoreComponent {
+        return object: CoreComponent{}
     }
 }
